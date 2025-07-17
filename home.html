@@ -9,15 +9,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        html, body {
-            overflow: hidden;
-            height: 100%;
-        }
         body {
             font-family: 'Nunito', sans-serif;
             margin: 0;
             padding: 0;
-            position: relative; 
+            position: relative;
+            min-height: 100vh;
         }
         body::before {
             content: "";
@@ -49,109 +46,104 @@
         }
         .game-card {
             border-radius: 12px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease; 
+            transition: transform 0.3s ease, box-shadow 0.3s ease;  
             border: 2px solid rgba(255, 255, 255, 0.8);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             color: white;
             text-shadow: 0 1px 3px rgba(0,0,0,0.2);
-            position: relative; 
+            position: relative;  
             overflow: hidden;
         }
         .game-card:hover {
             transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); 
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);  
         }
         .bg-card-blue { background-color: #3B82F6; }
         .bg-card-green { background-color: #10B981; }
         .bg-card-purple { background-color: #8B5CF6; }
         .bg-card-red { background-color: #EF4444; }
         .title-font { font-weight: 900; }
-
-        /* --- DIUBAH: Nilai clamp() diperbesar untuk ikon dan teks --- */
         .responsive-icon {
-            /* Ukuran ikon akan beradaptasi, minimal 32px, maksimal 60px */
             width: clamp(32px, 8vmin, 60px);
             height: clamp(32px, 8vmin, 60px);
         }
         .responsive-text {
-            /* Ukuran font akan beradaptasi, minimal 12px, maksimal 18px */
             font-size: clamp(12px, 2.5vmin, 18px);
             line-height: 1.2;
         }
-
     </style>
 </head>
 <body>
 
     <div id="background-overlay"></div>
 
-    <div class="container mx-auto px-4 h-screen flex flex-col relative z-10">
+    <div class="container mx-auto px-4 min-h-screen flex flex-col relative z-10">
         
-        <header class="text-center py-2 sm:py-4 flex-shrink-0">
-            <h1 class="title-font text-gray-800 text-2xl sm:text-3xl md:text-4xl tracking-tight">Petualangan Sang Juara</h1>
-            <p class="mt-1 text-base sm:text-lg md:text-xl text-black/90 font-bold">Ayo Bermain dan Belajar!</p>
+        <header class="text-center py-4 sm:py-6 flex-shrink-0">
+            <h1 class="title-font text-gray-800 text-3xl sm:text-4xl md:text-5xl tracking-tight">Petualangan Sang Juara</h1>
+            <p class="mt-1 text-lg sm:text-xl md:text-2xl text-black/90 font-bold">Ayo Bermain dan Belajar!</p>
         </header>
 
-        <main class="flex-grow flex items-center justify-center min-h-0">
-            <div class="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-4 w-full h-full p-2">
+        <main class="flex-grow flex items-center justify-center min-h-0 py-4">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-5xl">
                 
-                <a href="kode rahasia" class="game-card flex flex-col items-center justify-center text-center p-1 sm:p-2 bg-card-blue">
+                <a href="kode rahasia" class="game-card flex flex-col items-center justify-center text-center p-2 sm:p-4 bg-card-blue aspect-square">
                     <svg class="responsive-icon mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h14.25c.621 0 1.125.504 1.125 1.125v14.25c0 .621-.504 1.125-1.125 1.125H5.625a1.125 1.125 0 01-1.125-1.125V4.875z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 12h9m-9 3.75h9M7.5 8.25h9"></path><path stroke-linecap="round" stroke-linejoin="round" d="M12 3.75v16.5"></path></svg>
                     <h2 class="font-bold responsive-text">Kode Rahasia</h2>
                 </a>
-                <a href="pola_tersembunyi" class="game-card flex flex-col items-center justify-center text-center p-1 sm:p-2 bg-card-green">
+                <a href="pola_tersembunyi" class="game-card flex flex-col items-center justify-center text-center p-2 sm:p-4 bg-card-green aspect-square">
                     <svg class="responsive-icon mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.432 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     <h2 class="font-bold responsive-text">Pola Tersembunyi</h2>
                 </a>
-                <a href="tangkap_gambar" class="game-card flex flex-col items-center justify-center text-center p-1 sm:p-2 bg-card-purple">
+                <a href="tangkap_gambar" class="game-card flex flex-col items-center justify-center text-center p-2 sm:p-4 bg-card-purple aspect-square">
                     <svg class="responsive-icon mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h.375c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125h-.375a1.125 1.125 0 01-1.125-1.125v-1.5zM3.75 18.375c0-.621.504-1.125 1.125-1.125h.375c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125h-.375a1.125 1.125 0 01-1.125-1.125v-1.5z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M9 4.875c0-.621.504-1.125 1.125-1.125h.375c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125h-.375a1.125 1.125 0 01-1.125-1.125v-1.5zM9 18.375c0-.621.504-1.125 1.125-1.125h.375c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125h-.375a1.125 1.125 0 01-1.125-1.125v-1.5z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 4.875c0-.621.504-1.125 1.125-1.125h.375c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125h-.375a1.125 1.125 0 01-1.125-1.125v-1.5zM14.25 18.375c0-.621.504-1.125 1.125-1.125h.375c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125h-.375a1.125 1.125 0 01-1.125-1.125v-1.5z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 11.625c0-.621.504-1.125 1.125-1.125h14.25c.621 0 1.125.504 1.125 1.125v.75c0 .621-.504 1.125-1.125 1.125H4.875a1.125 1.125 0 01-1.125-1.125v-.75z"></path></svg>
                     <h2 class="font-bold responsive-text">Tangkap Gambar</h2>
                 </a>
-                <a href="interpretasi_data" class="game-card flex flex-col items-center justify-center text-center p-1 sm:p-2 bg-card-red">
+                <a href="interpretasi_data" class="game-card flex flex-col items-center justify-center text-center p-2 sm:p-4 bg-card-red aspect-square">
                     <svg class="responsive-icon mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"></path></svg>
                     <h2 class="font-bold responsive-text">Interpretasi Data</h2>
                 </a>
-                <a href="analisa_kasus" class="game-card flex flex-col items-center justify-center text-center p-1 sm:p-2 bg-card-blue">
+                <a href="analisa_kasus" class="game-card flex flex-col items-center justify-center text-center p-2 sm:p-4 bg-card-blue aspect-square">
                     <svg class="responsive-icon mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m5.231 13.481L15 17.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9zm-4.5 15.75h.008v.008h-.008v-.008z"></path></svg>
                     <h2 class="font-bold responsive-text">Analisa Kasus</h2>
                 </a>
-                <a href="jejak_memori" class="game-card flex flex-col items-center justify-center text-center p-1 sm:p-2 bg-card-green">
+                <a href="jejak_memori" class="game-card flex flex-col items-center justify-center text-center p-2 sm:p-4 bg-card-green aspect-square">
                     <svg class="responsive-icon mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 012.826-5.175l2.826-.807a4.5 4.5 0 015.175 2.826l.807 2.826a4.5 4.5 0 01-2.826 5.175l-2.826.807a4.5 4.5 0 01-5.175-2.826zM15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     <h2 class="font-bold responsive-text">Jejak Memori</h2>
                 </a>
-                <a href="cari_yang_beda" class="game-card flex flex-col items-center justify-center text-center p-1 sm:p-2 bg-card-purple">
+                <a href="cari_yang_beda" class="game-card flex flex-col items-center justify-center text-center p-2 sm:p-4 bg-card-purple aspect-square">
                     <svg class="responsive-icon mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"></path></svg>
                     <h2 class="font-bold responsive-text">Cari Yang Beda</h2>
                 </a>
-                <a href="rotasi_3D" class="game-card flex flex-col items-center justify-center text-center p-1 sm:p-2 bg-card-red">
+                <a href="rotasi_3D" class="game-card flex flex-col items-center justify-center text-center p-2 sm:p-4 bg-card-red aspect-square">
                     <svg class="responsive-icon mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"></path></svg>
                     <h2 class="font-bold responsive-text">Rotasi 3D</h2>
                 </a>
-                <a href="matriks_logika" class="game-card flex flex-col items-center justify-center text-center p-1 sm:p-2 bg-card-blue">
+                <a href="matriks_logika" class="game-card flex flex-col items-center justify-center text-center p-2 sm:p-4 bg-card-blue aspect-square">
                     <svg class="responsive-icon mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.5-6h15m-15-6h15m-15 12h15"></path></svg>
                     <h2 class="font-bold responsive-text">Matriks Logika</h2>
                 </a>
-                <a href="hubungan_konsep" class="game-card flex flex-col items-center justify-center text-center p-1 sm:p-2 bg-card-green">
+                <a href="hubungan_konsep" class="game-card flex flex-col items-center justify-center text-center p-2 sm:p-4 bg-card-green aspect-square">
                     <svg class="responsive-icon mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"></path></svg>
                     <h2 class="font-bold responsive-text">Hubungan Konsep</h2>
                 </a>
-                <a href="misteri_algoritma" class="game-card flex flex-col items-center justify-center text-center p-1 sm:p-2 bg-card-purple">
+                <a href="misteri_algoritma" class="game-card flex flex-col items-center justify-center text-center p-2 sm:p-4 bg-card-purple aspect-square">
                     <svg class="responsive-icon mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"></path></svg>
                     <h2 class="font-bold responsive-text">Misteri Algoritma</h2>
                 </a>
-                <a href="silogisme" class="game-card flex flex-col items-center justify-center text-center p-1 sm:p-2 bg-card-red">
+                <a href="silogisme" class="game-card flex flex-col items-center justify-center text-center p-2 sm:p-4 bg-card-red aspect-square">
                     <svg class="responsive-icon mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 17.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"></path></svg>
                     <h2 class="font-bold responsive-text">Silogisme</h2>
                 </a>
-                <a href="bobot_misterius" class="game-card flex flex-col items-center justify-center text-center p-1 sm:p-2 bg-card-blue">
+                <a href="bobot_misterius" class="game-card flex flex-col items-center justify-center text-center p-2 sm:p-4 bg-card-blue aspect-square">
                     <svg class="responsive-icon mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.153.24c-1.183 0-2.316-.401-3.22-1.072L12 15.75M3 15.75l2.62 1.072c.904.67 2.037 1.072 3.22 1.072.744 0 1.453-.102 2.153-.24a1.446 1.446 0 00.589-1.202L18.75 5.5m-13.5 0c-1.01.143-2.01.317-3 .52m3-.52l-2.62 10.726a1.446 1.446 0 00.589 1.202 5.989 5.989 0 002.153.24c1.183 0 2.316-.401 3.22-1.072L12 15.75"></path></svg>
                     <h2 class="font-bold responsive-text">Bobot Misterius</h2>
                 </a>
-                <a href="analogi_verbal" class="game-card flex flex-col items-center justify-center text-center p-1 sm:p-2 bg-card-green">
+                <a href="analogi_verbal" class="game-card flex flex-col items-center justify-center text-center p-2 sm:p-4 bg-card-green aspect-square">
                     <svg class="responsive-icon mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"></path></svg>
                     <h2 class="font-bold responsive-text">Analogi Verbal</h2>
                 </a>
-                <a href="deret_angka" class="game-card flex flex-col items-center justify-center text-center p-1 sm:p-2 bg-card-purple">
+                <a href="deret_angka" class="game-card flex flex-col items-center justify-center text-center p-2 sm:p-4 bg-card-purple aspect-square">
                     <svg class="responsive-icon mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h12A2.25 2.25 0 0020.25 14.25V5.25A2.25 2.25 0 0018 3H6A2.25 2.25 0 003.75 3zM3.75 14.25h16.5M12 18.75h.008v.008H12v-.008z"></path></svg>
                     <h2 class="font-bold responsive-text">Deret Angka</h2>
                 </a>
@@ -159,8 +151,8 @@
             </div>
         </main>
         
-        <footer class="text-center py-2 flex-shrink-0">
-            <p class="text-gray-900/80 font-semibold text-xs">&copy; StupaXplore 2025</p>
+        <footer class="text-center py-4 flex-shrink-0">
+            <p class="text-gray-900/80 font-semibold text-sm">&copy; StupaXplore 2025</p>
         </footer>
 
     </div>
