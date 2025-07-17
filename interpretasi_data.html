@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interpretasi Data</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #ffdde1 0%, #ee9ca7 100%);
+            color: #1f2937;
+        }
+        .card {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 3px solid #fff;
+        }
+        .modal-bg {
+            background-color: rgba(0, 0, 0, 0.6);
+            transition: opacity 0.3s ease;
+        }
+        .answer-btn {
+            transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+            border: 2px solid #9ca3af;
+            background-color: #f3f4f6;
+            color: #374151;
+            text-align: center;
+            font-size: 1rem;
+            line-height: 1.5;
+            font-weight: 700;
+        }
+        .answer-btn:hover {
+            transform: translateY(-4px);
+            border-color: #8b5cf6;
+            background-color: #ede9fe;
+        }
+        #chart-display svg {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div id="instruction-modal" class="fixed inset-0 modal-bg flex items-center justify-center p-4 z-20">
+        <div class="card w-full max-w-md p-8 text-center transform transition-all scale-95 opacity-0">
+            <img src="https://placehold.co/150x150/8b5cf6/FFFFFF?text=📈" alt="Ikon Analisis Data" class="mx-auto mb-4 rounded-full">
+            <h2 class="text-3xl font-black text-gray-800">Interpretasi Data</h2>
+            <p class="text-xl text-gray-700 mt-4 mb-6 text-left">
+                Perhatikan grafik yang ditampilkan dengan seksama. Baca pertanyaannya, lalu pilih jawaban yang paling tepat berdasarkan data pada grafik. Kamu punya waktu <strong>200 detik</strong>.
+            </p>
+            <button id="start-game-btn" class="w-full bg-green-500 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-green-600 transition">
+                Mulai Menganalisis
+            </button>
+        </div>
+    </div>
+
+    <div id="game-container" class="card w-full max-w-2xl p-6 md:p-8 hidden">
+        <header class="mb-4 text-center">
+            <h1 class="text-3xl md:text-4xl font-black text-gray-800">Interpretasi Data</h1>
+            <div class="flex justify-between items-center mt-2 text-lg">
+                <p class="font-bold text-gray-600">Soal: <span id="question-number">1/10</span></p>
+                <p class="font-bold text-red-500">Waktu: <span id="timer">200</span> detik</p>
+            </div>
+        </header>
+
+        <main>
+            <p id="question-text" class="text-xl font-bold text-center mb-2 text-gray-800"></p>
+            <div id="chart-display" class="w-full h-80 bg-gray-100 rounded-lg p-2 mb-4 flex items-center justify-center">
+            </div>
+            <div id="answer-buttons" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            </div>
+        </main>
+    </div>
+
+    <div id="result-modal" class="fixed inset-0 modal-bg flex items-center justify-center p-4 hidden z-20">
+        <div class="card w-full max-w-md p-8 text-center transform transition-all scale-95 opacity-0">
+            <img id="result-icon" src="https://placehold.co/150x150/66a6ff/FFFFFF?text=🏆" alt="Ikon Hasil" class="mx-auto mb-4 rounded-full">
+            <h2 id="result-title" class="text-4xl font-black text-yellow-500">Analis Handal!</h2>
+            <p id="result-description" class="text-lg text-gray-700 mt-2 mb-4">Kamu sangat jeli dalam membaca data!</p>
+            <div class="bg-blue-100 p-4 rounded-lg text-2xl font-bold text-blue-800 mb-6">
+                Skor Akhir: <span id="final-score">0</span>
+            </div>
+            <button onclick="window.location.reload()" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-blue-700 transition">
+                Coba Lagi
+            </button>
+            <button onclick="window.location.href = './'" class="w-full bg-green-500 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-green-600 transition mt-3">
+                Kembali ke Menu
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+             { type: 'bar', title: 'Hobi Siswa Kelas 6', data: [{label: 'Musik', value: 8}, {label: 'Olahraga', value: 15}, {label: 'Membaca', value: 12}, {label: 'Game', value: 10}], question: 'Hobi apakah yang paling sedikit disukai?', options: ['Musik', 'Olahraga', 'Membaca', 'Game'], answer: 'Musik' },
+             { type: 'pie', title: 'Buah Favorit', data: [{label: 'Apel', value: 25}, {label: 'Jeruk', value: 30}, {label: 'Pisang', value: 20}, {label: 'Anggur', value: 25}], question: 'Buah apakah yang paling banyak disukai?', options: ['Apel', 'Jeruk', 'Pisang', 'Anggur'], answer: 'Jeruk' },
+             { type: 'bar', title: 'Nilai Ujian', data: [{label: 'Andi', value: 85}, {label: 'Budi', value: 90}, {label: 'Cici', value: 75}, {label: 'Dedi', value: 85}], question: 'Siapakah yang mendapat nilai tertinggi?', options: ['Andi', 'Budi', 'Cici', 'Dedi'], answer: 'Budi' },
+             { type: 'pie', title: 'Hewan di Kebun Binatang', data: [{label: 'Mamalia', value: 40}, {label: 'Burung', value: 30}, {label: 'Reptil', value: 20}, {label: 'Lainnya', value: 10}], question: 'Berapa persen jumlah Burung?', options: ['40%', '30%', '20%', '10%'], answer: '30%' },
+             { type: 'bar', title: 'Pengunjung Perpustakaan', data: [{label: 'Senin', value: 50}, {label: 'Selasa', value: 65}, {label: 'Rabu', value: 60}, {label: 'Kamis', value: 70}], question: 'Pada hari apa pengunjung paling banyak?', options: ['Senin', 'Selasa', 'Rabu', 'Kamis'], answer: 'Kamis' },
+             { type: 'bar', title: 'Penjualan Roti', data: [{label: 'Cokelat', value: 18}, {label: 'Keju', value: 15}, {label: 'Stroberi', value: 15}, {label: 'Nanas', value: 9}], question: 'Roti rasa apa yang penjualannya sama dengan rasa Keju?', options: ['Cokelat', 'Keju', 'Stroberi', 'Nanas'], answer: 'Stroberi' },
+             { type: 'pie', title: 'Komposisi Sampah', data: [{label: 'Plastik', value: 50}, {label: 'Kertas', value: 30}, {label: 'Organik', value: 20}], question: 'Jenis sampah apa yang jumlahnya paling sedikit?', options: ['Plastik', 'Kertas', 'Organik', 'Tidak ada'], answer: 'Organik' },
+             { type: 'bar', title: 'Suhu Rata-rata (°C)', data: [{label: 'Januari', value: 28}, {label: 'Februari', value: 29}, {label: 'Maret', value: 31}, {label: 'April', value: 30}], question: 'Berapa suhu rata-rata pada bulan Maret?', options: ['28', '29', '30', '31'], answer: '31' },
+             { type: 'pie', title: 'Pengguna Medsos', data: [{label: 'YouTube', value: 45}, {label: 'TikTok', value: 35}, {label: 'Instagram', value: 20}], question: 'Media sosial mana yang lebih populer dari Instagram tapi kurang dari YouTube?', options: ['YouTube', 'TikTok', 'Instagram', 'Facebook'], answer: 'TikTok' },
+             { type: 'bar', title: 'Jumlah Pohon di Kebun', data: [{label: 'Mangga', value: 12}, {label: 'Jambu', value: 12}, {label: 'Rambutan', value: 15}], question: 'Berapa total pohon Mangga dan Jambu?', options: ['12', '15', '24', '27'], answer: '24' }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timeLeft = 200;
+        let timerInterval;
+
+        const instructionModalEl = document.getElementById('instruction-modal');
+        const gameContainerEl = document.getElementById('game-container');
+        const resultModalEl = document.getElementById('result-modal');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const questionNumberEl = document.getElementById('question-number');
+        const timerEl = document.getElementById('timer');
+        const chartDisplayEl = document.getElementById('chart-display');
+        const questionTextEl = document.getElementById('question-text');
+        const answerButtonsEl = document.getElementById('answer-buttons');
+        const finalScoreEl = document.getElementById('final-score');
+        
+        const resultIconEl = document.getElementById('result-icon');
+        const resultTitleEl = document.getElementById('result-title');
+        const resultDescriptionEl = document.getElementById('result-description');
+
+
+        const correctSound = new Tone.Synth({ oscillator: 'sine', envelope: { attack: 0.01, release: 0.2 } }).toDestination();
+        const wrongSound = new Tone.Synth({ oscillator: 'square', envelope: { attack: 0.01, release: 0.2 } }).toDestination();
+        
+        function createBarChart(data, title) {
+            const chartWidth = 400;
+            const chartHeight = 320; 
+            const margins = { top: 40, right: 20, bottom: 80, left: 30 };
+            
+            const graphWidth = chartWidth - margins.left - margins.right;
+            const graphHeight = chartHeight - margins.top - margins.bottom;
+            
+            const maxValue = Math.ceil(Math.max(...data.map(d => d.value)) * 1.15); 
+            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+            
+            const barWidth = (graphWidth / data.length) * 0.6;
+            const gap = (graphWidth / data.length) * 0.4;
+            
+            let bars = '';
+            data.forEach((d, i) => {
+                const barHeight = d.value > 0 ? (d.value / maxValue) * graphHeight : 0;
+                const xPos = margins.left + i * (barWidth + gap) + (gap / 2);
+                const yPos = margins.top + graphHeight - barHeight;
+                
+                const labelX = xPos + barWidth / 2;
+                const labelY = margins.top + graphHeight + 10;
+
+                bars += `
+                    <g>
+                        <rect x="${xPos}" y="${yPos}" width="${barWidth}" height="${barHeight}" fill="${colors[i % colors.length]}" rx="4"></rect>
+                        <text x="${labelX}" y="${yPos - 8}" text-anchor="middle" font-size="14" fill="#1f2937" font-weight="bold">${d.value}</text>
+                        <text x="${labelX}" y="${labelY}" transform="rotate(-45, ${labelX}, ${labelY})" text-anchor="end" font-size="14" fill="#374151" font-weight="bold">${d.label}</text>
+                    </g>
+                `;
+            });
+
+            const axisLine = `<line x1="${margins.left}" y1="${margins.top + graphHeight}" x2="${margins.left + graphWidth}" y2="${margins.top + graphHeight}" stroke="#9ca3af" stroke-width="1.5"/>`;
+
+            return `<svg viewBox="0 0 ${chartWidth} ${chartHeight}" preserveAspectRatio="xMidYMid meet" aria-labelledby="chart-title" role="img">
+                        <title id="chart-title">${title}</title>
+                        <desc>Grafik batang yang menampilkan: ${title}.</desc>
+                        <text x="${chartWidth / 2}" y="25" text-anchor="middle" font-size="18" font-weight="bold">${title}</text>
+                        ${axisLine}
+                        ${bars}
+                    </svg>`;
+        }
+
+        function createPieChart(data, title) {
+            const total = data.reduce((sum, d) => sum + d.value, 0);
+            let cumulative = 0;
+            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+            let paths = '';
+            let legend = '';
+            const radius = 80;
+            const cx = 110;
+            const cy = 130; 
+            data.forEach((d, i) => {
+                const percentage = d.value / total;
+                if (percentage === 0) return;
+                const startAngle = (cumulative / total) * 360;
+                cumulative += d.value;
+                const endAngle = (cumulative / total) * 360;
+                if (Math.abs(endAngle - startAngle) >= 360) {
+                    paths += `<circle cx="${cx}" cy="${cy}" r="${radius}" fill="${colors[i % colors.length]}"></circle>`;
+                } else {
+                    const largeArcFlag = percentage > 0.5 ? 1 : 0;
+                    const x1 = cx + radius * Math.cos(Math.PI * (startAngle - 90) / 180);
+                    const y1 = cy + radius * Math.sin(Math.PI * (startAngle - 90) / 180);
+                    const x2 = cx + radius * Math.cos(Math.PI * (endAngle - 90) / 180);
+                    const y2 = cy + radius * Math.sin(Math.PI * (endAngle - 90) / 180);
+                    paths += `<path d="M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z" fill="${colors[i % colors.length]}"></path>`;
+                }
+                legend += `<g transform="translate(220, ${80 + i * 25})"><rect width="15" height="15" fill="${colors[i % colors.length]}" rx="4"></rect><text x="25" y="13" font-size="14" fill="#374151">${d.label} (${d.value}%)</text></g>`;
+            });
+            return `<svg viewBox="0 0 380 260" preserveAspectRatio="xMidYMid meet" aria-labelledby="chart-title-pie" role="img">
+                        <title id="chart-title-pie">${title}</title>
+                        <desc>Grafik pai yang menampilkan: ${title}.</desc>
+                        <text x="190" y="30" text-anchor="middle" font-size="18" font-weight="bold">${title}</text>
+                        ${paths}${legend}
+                    </svg>`;
+        }
+
+        function setupLevel(levelIndex) {
+            const q = questions[levelIndex];
+            questionNumberEl.textContent = `${levelIndex + 1}/${questions.length}`;
+            questionTextEl.textContent = q.question;
+            
+            if (q.type === 'bar') {
+                chartDisplayEl.innerHTML = createBarChart(q.data, q.title);
+            } else if (q.type === 'pie') {
+                chartDisplayEl.innerHTML = createPieChart(q.data, q.title);
+            }
+
+            answerButtonsEl.innerHTML = '';
+            q.options.forEach((option) => {
+                const button = document.createElement('button');
+                button.className = 'answer-btn w-full p-3 rounded-lg';
+                button.textContent = option;
+                button.onclick = () => selectAnswer(option, q.answer);
+                answerButtonsEl.appendChild(button);
+            });
+        }
+
+        function selectAnswer(selectedOption, correctAnswer) {
+            answerButtonsEl.querySelectorAll('button').forEach(btn => btn.disabled = true);
+
+            if (selectedOption.toString() === correctAnswer.toString()) {
+                score++;
+                correctSound.triggerAttackRelease("E5", "8n");
+            } else {
+                wrongSound.triggerAttackRelease("E2", "8n");
+            }
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex >= questions.length) {
+                    endGame();
+                } else {
+                    setupLevel(currentQuestionIndex);
+                }
+            }, 500);
+        }
+
+        function startTimer() {
+            timeLeft = 200;
+            timerEl.textContent = timeLeft;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerEl.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+
+            let title, description, iconSrc;
+
+            if (score <= 2) {
+                title = "Perlu Lebih Teliti";
+                description = "Jangan terburu-buru, perhatikan detail pada grafik. Ayo coba lagi!";
+                iconSrc = "https://placehold.co/150x150/f87171/FFFFFF?text=🧐";
+            } else if (score <= 5) {
+                title = "Cukup Baik!";
+                description = "Kamu sudah mulai paham, teruslah berlatih membaca data agar makin jeli!";
+                iconSrc = "https://placehold.co/150x150/fbbf24/FFFFFF?text=👍";
+            } else if (score <= 8) {
+                title = "Bagus Sekali!";
+                description = "Kemampuan analisismu hebat! Sedikit lagi menuju sempurna.";
+                iconSrc = "https://placehold.co/150x150/34d399/FFFFFF?text=🎉";
+            } else { // Skor 9-10
+                title = "Analis Handal!";
+                description = "Luar biasa! Kamu sangat teliti dan akurat dalam menginterpretasi data.";
+                iconSrc = "https://placehold.co/150x150/8b5cf6/FFFFFF?text=🏆";
+            }
+
+            if (timeLeft <= 0) {
+                title = "Waktu Habis!";
+            }
+            
+            resultTitleEl.textContent = title;
+            resultDescriptionEl.textContent = description;
+            resultIconEl.src = iconSrc;
+            finalScoreEl.textContent = `${score} / ${questions.length}`;
+            
+            gameContainerEl.classList.add('hidden');
+            resultModalEl.classList.remove('hidden');
+            setTimeout(() => {
+                resultModalEl.querySelector('.card').classList.remove('scale-95', 'opacity-0');
+            }, 10);
+        }
+
+        function initializePage() {
+            const modalContent = instructionModalEl.querySelector('.card');
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+
+            startGameBtn.addEventListener('click', () => {
+                if (Tone.context.state !== 'running') {
+                    Tone.start();
+                }
+                instructionModalEl.classList.add('hidden');
+                gameContainerEl.classList.remove('hidden');
+                currentQuestionIndex = 0;
+                score = 0;
+                setupLevel(currentQuestionIndex);
+                startTimer();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initializePage);
+    </script>
+</body>
+</html>

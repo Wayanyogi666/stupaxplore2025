@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pola Tersembunyi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #f0f4f8; 
+            --card-color: #ffffff;
+            --primary-text: #1e293b;
+            --secondary-text: #64748b;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --border-color: #e2e8f0;
+            --correct-color: #10b981;
+            --incorrect-color: #ef4444;
+            --timer-color: #f59e0b;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #ffec80, #ffb347, #ff8c69);
+            background-size: 400% 400%;
+            animation: gradientAnimation 18s ease infinite;
+            color: var(--primary-text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        #game-container {
+            display: none; /* Awalnya disembunyikan */
+            background-color: var(--card-color);
+            width: 100%;
+            max-width: 700px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .game-header h1 {
+            font-size: 1.75rem;
+            margin-top: 0;
+        }
+
+        .game-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            align-items: center;
+            color: var(--secondary-text);
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+        
+        #timer-display {
+            color: var(--timer-color);
+            font-size: 2.2rem;
+        }
+
+        #timer-value {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .pattern-container {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background-color: #f9fafb;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+        }
+
+        .pattern-box {
+            width: 60px;
+            height: 60px;
+            background-color: var(--card-color);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--secondary-text);
+        }
+
+        .options-title {
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: var(--secondary-text);
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+        }
+
+        .option-box {
+            height: 100px;
+            background-color: var(--card-color);
+            border: 3px solid var(--border-color);
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+            overflow: hidden;
+        }
+
+        .option-box:hover, .option-box:focus {
+            transform: translateY(-5px);
+            border-color: var(--accent-color);
+            outline: none;
+        }
+
+        .option-box.correct {
+            border-color: var(--correct-color);
+            animation: pulse-correct 0.5s;
+        }
+        .option-box.incorrect {
+            border-color: var(--incorrect-color);
+            animation: shake-incorrect 0.5s;
+        }
+        .option-box.reveal-correct {
+             border-color: var(--correct-color);
+        }
+
+        /* Animasi */
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes pulse-correct {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake-incorrect {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: var(--card-color);
+            padding: 2.5rem;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-icon {
+            font-size: 4rem;
+        }
+
+        .modal-content h2 {
+            font-size: 2rem;
+            margin: 1rem 0;
+        }
+
+        /* --- PERUBAHAN CSS: Menambahkan style untuk keterangan --- */
+        .modal-description {
+            color: var(--secondary-text);
+            margin: -0.5rem 0 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 2rem;
+        }
+
+        .modal-content button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            width: 100%;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        #menu-button {
+            background-color: var(--secondary-text);
+        }
+        #menu-button:hover {
+            background-color: var(--primary-text);
+        }
+
+        .modal-content button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .final-score-container {
+            margin: 1.5rem 0;
+        }
+        .final-score-label {
+            font-size: 1.2rem;
+            color: var(--secondary-text);
+            font-weight: 600;
+        }
+        .final-score-value {
+            display: block;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+        
+        /* Responsive */
+        @media (max-width: 500px) {
+            .game-info {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+                margin-bottom: 1.5rem;
+            }
+            .pattern-container {
+                gap: 0.5rem;
+            }
+            .pattern-box {
+                width: 50px;
+                height: 50px;
+            }
+            #game-container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <header class="game-header">
+            <h1>Lengkapi Pola Berikut!</h1>
+            <div class="game-info">
+                <p>Soal: <span id="question-info">1 / 10</span></p>
+                <p id="timer-display"><span id="timer-value">02:00</span></p>
+                <p>Skor: <span id="score-value">0 / 10</span></p>
+            </div>
+        </header>
+
+        <main>
+            <div id="pattern-container" class="pattern-container">
+                </div>
+
+            <div class="options-title">Pilih Jawabanmu:</div>
+            <div id="options-container" class="options-container">
+                </div>
+        </main>
+    </div>
+
+    <div id="start-modal" class="modal active">
+        <div class="modal-content">
+            <div class="modal-icon">🧠</div>
+            <h2>Pola Tersembunyi</h2> 
+            <p>Uji kemampuan logikamu dengan menebak gambar selanjutnya. Selesaikan semua soal sebelum waktu habis!</p>
+            <button id="start-button">Mulai Game</button>
+        </div>
+    </div>
+
+    <div id="end-modal" class="modal">
+        <div class="modal-content">
+            <div id="end-modal-icon" class="modal-icon">🎉</div>
+            <h2 id="end-modal-title">Game Selesai!</h2>
+            <p id="end-modal-keterangan" class="modal-description"></p>
+            <div class="final-score-container">
+                <span class="final-score-label">Skor Akhir</span>
+                <span id="final-score-value" class="final-score-value">0 / 10</span>
+            </div>
+             <div class="modal-buttons">
+                 <button id="play-again-button">Main Lagi</button>
+                 <button id="menu-button">Kembali ke Menu</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // === ELEMEN DOM ===
+            const DOMElements = {
+                gameContainer: document.getElementById('game-container'),
+                questionInfo: document.getElementById('question-info'),
+                scoreValue: document.getElementById('score-value'),
+                timerValue: document.getElementById('timer-value'),
+                patternContainer: document.getElementById('pattern-container'),
+                optionsContainer: document.getElementById('options-container'),
+                startModal: document.getElementById('start-modal'),
+                endModal: document.getElementById('end-modal'),
+                startButton: document.getElementById('start-button'),
+                playAgainButton: document.getElementById('play-again-button'),
+                menuButton: document.getElementById('menu-button'),
+                finalScoreValue: document.getElementById('final-score-value'),
+                endModalIcon: document.getElementById('end-modal-icon'),
+                endModalTitle: document.getElementById('end-modal-title'),
+                // --- PERUBAHAN JS: Menambahkan referensi elemen keterangan ---
+                endModalKeterangan: document.getElementById('end-modal-keterangan'),
+            };
+
+            // === BANK SOAL (10 SOAL) ===
+            const questions = [
+                { pattern: [ { type: 'shape', shape: 'circle', color: '#ef4444' }, { type: 'shape', shape: 'circle', color: '#facc15' } ], options: [ { type: 'shape', shape: 'circle', color: '#10b981' }, { type: 'shape', shape: 'circle', color: '#ef4444' }, { type: 'shape', shape: 'square', color: '#10b981' }, { type: 'shape', shape: 'circle', color: '#3b82f6' } ], answer: { type: 'shape', shape: 'circle', color: '#10b981' } },
+                { pattern: [ { type: 'dots', count: 1 }, { type: 'dots', count: 2 }, { type: 'dots', count: 3 } ], options: [ { type: 'dots', count: 5 }, { type: 'dots', count: 3 }, { type: 'dots', count: 4 }, { type: 'dots', count: 1 } ], answer: { type: 'dots', count: 4 } },
+                { pattern: [ { type: 'arrow', rotation: 0 }, { type: 'arrow', rotation: 90 }, { type: 'arrow', rotation: 180 } ], options: [ { type: 'arrow', rotation: 90 }, { type: 'arrow', rotation: 270 }, { type: 'arrow', rotation: 0 }, { type: 'arrow', rotation: 180 } ], answer: { type: 'arrow', rotation: 270 } },
+                { pattern: [ { type: 'shape', shape: 'circle', color: '#a855f7' }, { type: 'shape', shape: 'square', color: '#a855f7' } ], options: [ { type: 'shape', shape: 'circle', color: '#a855f7' }, { type: 'shape', shape: 'triangle', color: '#facc15' }, { type: 'shape', shape: 'triangle', color: '#a855f7' }, { type: 'shape', shape: 'square', color: '#a855f7' } ], answer: { type: 'shape', shape: 'triangle', color: '#a855f7' } },
+                { pattern: [ { type: 'fill', filled: true, color: '#3b82f6' }, { type: 'fill', filled: false, color: '#3b82f6' }, { type: 'fill', filled: true, color: '#3b82f6' } ], options: [ { type: 'fill', filled: false, color: '#ef4444' }, { type: 'fill', filled: true, color: '#3b82f6' }, { type: 'fill', filled: false, color: '#3b82f6' }, { type: 'fill', filled: true, color: '#10b981' } ], answer: { type: 'fill', filled: false, color: '#3b82f6' } },
+                { pattern: [ { type: 'position', align: 'flex-start', justify: 'flex-start'}, { type: 'position', align: 'center', justify: 'center'} ], options: [ { type: 'position', align: 'flex-start', justify: 'flex-end'}, { type: 'position', align: 'flex-end', justify: 'flex-end'}, { type: 'position', align: 'flex-end', justify: 'flex-start'}, { type: 'position', align: 'center', justify: 'center'} ], answer: { type: 'position', align: 'flex-end', justify: 'flex-end' } },
+                { pattern: [ { type: 'reflect', char: 'F' }, { type: 'reflect', char: 'F', reflect: true } ], options: [ { type: 'reflect', char: 'L' }, { type: 'reflect', char: 'F', reflect: true }, { type: 'reflect', char: 'E' }, { type: 'reflect', char: 'F' } ], answer: { type: 'reflect', char: 'F' } },
+                { pattern: [ { type: 'size', scale: 0.6 }, { type: 'size', scale: 0.8 }, { type: 'size', scale: 1.0 } ], options: [ { type: 'size', scale: 0.6 }, { type: 'size', scale: 1.0 }, { type: 'size', scale: 0.8 }, { type: 'size', scale: 0.4 } ], answer: { type: 'size', scale: 0.8 } },
+                { pattern: [ { type: 'line_count', count: 1 }, { type: 'line_count', count: 2 } ], options: [ { type: 'line_count', count: 4 }, { type: 'line_count', count: 2 }, { type: 'line_count', count: 1 }, { type: 'line_count', count: 3 } ], answer: { type: 'line_count', count: 3 } },
+                { pattern: [ { type: 'shape', shape: 'square', color: '#f97316' }, { type: 'shape', shape: 'circle', color: '#10b981' } ], options: [ { type: 'shape', shape: 'square', color: '#f97316' }, { type: 'shape', shape: 'circle', color: '#f97316' }, { type: 'shape', shape: 'square', color: '#10b981' }, { type: 'shape', shape: 'triangle', color: '#10b981' } ], answer: { type: 'shape', shape: 'square', color: '#f97316' } }
+            ];
+
+            // === STATUS GAME ===
+            let gameState = {
+                score: 0,
+                currentIndex: 0,
+                questions: [],
+                timer: 120,
+                timerId: null,
+                isActive: false,
+            };
+            
+            // === FUNGSI-FUNGSI GAME ===
+            
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+            }
+
+            function createPatternElement(item) {
+                const size = "40px";
+                switch (item.type) {
+                    case 'shape':
+                        let shapeStyle = `width:${size}; height:${size}; background-color:${item.color};`;
+                        if (item.shape === 'circle') shapeStyle += ' border-radius: 50%;';
+                        if (item.shape === 'triangle') return `<svg width="${size}" height="${size}" viewBox="0 0 100 100"><polygon points="50,10 95,90 5,90" style="fill:${item.color};"/></svg>`;
+                        return `<div style="${shapeStyle}"></div>`;
+                    case 'dots':
+                        let dotsHtml = '<div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 5px; width: 30px; height: 30px;">';
+                        for (let i = 0; i < item.count; i++) dotsHtml += '<div style="width: 10px; height: 10px; background-color: #1e293b; border-radius: 50%;"></div>';
+                        return dotsHtml + '</div>';
+                    case 'arrow':
+                        return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" style="transform: rotate(${item.rotation}deg);"><path d="M12 2L12 22M12 2L6 8M12 2L18 8" stroke="#1e293b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+                    case 'fill':
+                        const fillStyle = item.filled ? `background-color:${item.color};` : `border: 4px solid ${item.color}; background-color: transparent;`;
+                        return `<div style="width:${size}; height:${size}; border-radius: 50%; ${fillStyle} box-sizing: border-box;"></div>`;
+                    case 'position':
+                          return `<div style="width: 100%; height:100%; display:flex; align-items:${item.align}; justify-content:${item.justify};"><div style="width:15px; height:15px; background-color:#a855f7; border-radius:50%;"></div></div>`;
+                    case 'reflect':
+                        const reflectTransform = item.reflect ? 'scaleX(-1)' : '';
+                        return `<div style="font-size: 2.5rem; font-weight:700; color: #1e293b; transform: ${reflectTransform};">${item.char}</div>`;
+                    case 'size':
+                        return `<div style="width:${size}; height:${size}; background-color:#f97316; border-radius:12px; transform: scale(${item.scale});"></div>`;
+                    case 'line_count':
+                        let lines = '<div style="display:flex; justify-content:space-around; align-items:center; width:100%; height:100%;">';
+                        for (let i = 0; i < item.count; i++) lines += '<div style="width:5px; height: 30px; background-color: #1e293b; border-radius: 5px;"></div>';
+                        return lines + '</div>';
+                    default: return '';
+                }
+            }
+            
+            function formatTime(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+            }
+
+            function startTimer() {
+                if (gameState.timerId) clearInterval(gameState.timerId);
+                gameState.timerId = setInterval(() => {
+                    if (gameState.timer > 0) {
+                        gameState.timer--;
+                        DOMElements.timerValue.textContent = formatTime(gameState.timer);
+                    } else {
+                        endGame('time');
+                    }
+                }, 1000);
+            }
+
+            function stopTimer() {
+                clearInterval(gameState.timerId);
+            }
+
+            function renderQuestion() {
+                if (!gameState.isActive) return;
+
+                DOMElements.patternContainer.innerHTML = '';
+                DOMElements.optionsContainer.innerHTML = '';
+                
+                const question = gameState.questions[gameState.currentIndex];
+                DOMElements.questionInfo.textContent = `${gameState.currentIndex + 1} / ${gameState.questions.length}`;
+
+                question.pattern.forEach(item => {
+                    const box = document.createElement('div');
+                    box.className = 'pattern-box';
+                    box.innerHTML = createPatternElement(item);
+                    DOMElements.patternContainer.appendChild(box);
+                });
+
+                const questionMarkBox = document.createElement('div');
+                questionMarkBox.className = 'pattern-box';
+                questionMarkBox.textContent = '?';
+                DOMElements.patternContainer.appendChild(questionMarkBox);
+                
+                let shuffledOptions = [...question.options];
+                shuffleArray(shuffledOptions);
+
+                shuffledOptions.forEach(option => {
+                    const optionBox = document.createElement('div');
+                    optionBox.className = 'option-box';
+                    optionBox.dataset.option = JSON.stringify(option);
+                    optionBox.innerHTML = createPatternElement(option);
+                    
+                    optionBox.setAttribute('role', 'button');
+                    optionBox.setAttribute('tabindex', '0');
+
+                    const handleSelect = () => checkAnswer(option, question.answer, optionBox);
+                    
+                    optionBox.addEventListener('click', handleSelect);
+                    optionBox.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            handleSelect();
+                        }
+                    });
+
+                    DOMElements.optionsContainer.appendChild(optionBox);
+                });
+            }
+            
+            function checkAnswer(selectedOption, correctAnswer, selectedElement) {
+                if (!gameState.isActive) return;
+
+                const allOptionElements = document.querySelectorAll('.option-box');
+                allOptionElements.forEach(box => {
+                    box.style.pointerEvents = 'none';
+                    box.removeAttribute('tabindex'); 
+                });
+                
+                const isCorrect = JSON.stringify(selectedOption) === JSON.stringify(correctAnswer);
+
+                if (isCorrect) {
+                    gameState.score++;
+                    DOMElements.scoreValue.textContent = `${gameState.score} / ${gameState.questions.length}`;
+                    selectedElement.classList.add('correct');
+                } else {
+                    selectedElement.classList.add('incorrect');
+                    allOptionElements.forEach(box => {
+                        if (box.dataset.option === JSON.stringify(correctAnswer)) {
+                            box.classList.add('reveal-correct');
+                        }
+                    });
+                }
+
+                setTimeout(() => {
+                    gameState.currentIndex++;
+                    if (gameState.currentIndex < gameState.questions.length) {
+                        renderQuestion();
+                    } else {
+                        endGame('complete');
+                    }
+                }, 1200);
+            }
+            
+            function startGame() {
+                DOMElements.gameContainer.style.display = 'block';
+                DOMElements.startModal.classList.remove('active');
+                
+                gameState.isActive = true;
+                gameState.score = 0;
+                gameState.currentIndex = 0;
+                gameState.questions = [...questions];
+                shuffleArray(gameState.questions); 
+                gameState.timer = 120;
+
+                DOMElements.scoreValue.textContent = `0 / ${gameState.questions.length}`;
+                DOMElements.timerValue.textContent = formatTime(gameState.timer);
+                
+                startTimer();
+                renderQuestion();
+            }
+            
+            // --- PERUBAHAN JS: Logika endGame diperbarui sepenuhnya ---
+            function endGame(reason) {
+                if (!gameState.isActive) return;
+                gameState.isActive = false;
+                stopTimer();
+                
+                let title = 'Game Selesai!';
+                let icon = '🎉';
+                let description = '';
+                const score = gameState.score;
+
+                // Tentukan judul, ikon, dan deskripsi berdasarkan skor
+                if (score <= 2) {
+                    title = 'Coba Lagi, ya!';
+                    icon = '🤔';
+                    description = 'Perlu banyak latihan untuk mengasah logikamu!';
+                } else if (score <= 5) {
+                    title = 'Cukup Baik!';
+                    icon = '👍';
+                    description = 'Kamu sudah mulai paham polanya, tingkatkan lagi!';
+                } else if (score <= 8) {
+                    title = 'Kerja Bagus!';
+                    icon = '🎉';
+                    description = 'Logikamu tajam, pertahankan prestasimu!';
+                } else { // Skor 9-10
+                    title = 'Luar Biasa!';
+                    icon = '🏆';
+                    description = 'Kamu adalah seorang Master Pola sejati!';
+                }
+                
+                // Timpa judul dan ikon jika waktu habis
+                if (reason === 'time') {
+                    title = 'Waktu Habis!';
+                    icon = '⏱️';
+                }
+
+                // Terapkan ke elemen modal
+                DOMElements.endModalTitle.textContent = title;
+                DOMElements.endModalIcon.textContent = icon;
+                DOMElements.endModalKeterangan.textContent = description;
+                DOMElements.finalScoreValue.textContent = `${score} / ${gameState.questions.length}`;
+                
+                // Sembunyikan container game sebelum menampilkan modal akhir
+                DOMElements.gameContainer.style.display = 'none';
+                DOMElements.endModal.classList.add('active');
+            }
+
+            // === EVENT LISTENERS ===
+            DOMElements.startButton.addEventListener('click', startGame);
+            
+            DOMElements.playAgainButton.addEventListener('click', () => {
+                DOMElements.endModal.classList.remove('active');
+                
+                const startModalH2 = DOMElements.startModal.querySelector('h2');
+                const startModalP = DOMElements.startModal.querySelector('p');
+                startModalH2.textContent = "Pola Tersembunyi";
+                startModalP.textContent = "Ayo, main sekali lagi! Tunjukkan kehebatan logikamu!";
+                
+                DOMElements.startModal.classList.add('active');
+            });
+
+            DOMElements.menuButton.addEventListener('click', () => {
+                DOMElements.endModal.classList.remove('active');
+
+                // Kembalikan teks modal ke semula
+                 const startModalH2 = DOMElements.startModal.querySelector('h2');
+                 const startModalP = DOMElements.startModal.querySelector('p');
+                 startModalH2.textContent = "Pola Tersembunyi";
+                 startModalP.textContent = "Uji kemampuan logikamu dengan menebak gambar selanjutnya. Selesaikan semua soal sebelum waktu habis!";
+                
+                DOMElements.startModal.classList.add('active');
+            });
+
+        });
+    </script>
+</body>
+</html>

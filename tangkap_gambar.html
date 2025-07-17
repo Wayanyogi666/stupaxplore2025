@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tangkap Gambar: Game Mengasah Ingatan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            /* Latar belakang diubah menjadi gradasi cerah dan ceria */
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            color: #374151; /* Warna teks diubah menjadi gelap agar kontras */
+            perspective: 1000px; /* Diperlukan untuk efek 3D flip */
+        }
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+        .memory-card {
+            width: 100%;
+            aspect-ratio: 1 / 1; /* Membuat kartu selalu persegi */
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+        }
+        .memory-card.flip {
+            transform: rotateY(180deg);
+        }
+        .front-face,
+        .back-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden; /* Menyembunyikan sisi belakang kartu saat menghadap depan */
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem; /* Ukuran emoji diperbesar */
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        .front-face {
+            /* Warna sisi depan kartu diubah menjadi putih */
+            background: #ffffff;
+            color: #374151;
+            transform: rotateY(180deg);
+        }
+        .back-face {
+            /* Warna sisi belakang kartu diubah menjadi gradasi ceria */
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            border: 3px solid #fff;
+        }
+        .info-card {
+            /* Warna kartu info disesuaikan dengan latar baru */
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.7);
+        }
+        .modal-bg {
+            background-color: rgba(0, 0, 0, 0.5);
+            transition: opacity 0.3s ease;
+        }
+        .modal-card {
+            /* Warna modal diubah menjadi putih */
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            border: 2px solid #89b3f8;
+        }
+        /* Responsif untuk layar kecil */
+        @media (max-width: 640px) {
+            .game-board {
+                gap: 0.5rem;
+            }
+            .front-face, .back-face {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div id="instruction-modal" class="fixed inset-0 modal-bg flex items-center justify-center p-4 z-20">
+        <div class="modal-card w-full max-w-sm p-8 text-center transform transition-all scale-95 opacity-0">
+            <div class="text-6xl mb-4">💡</div>
+            <h2 class="text-3xl font-black text-gray-800">Tangkap Gambar</h2>
+            <p class="text-lg text-gray-600 mt-2 mb-6">
+                Temukan semua pasangan kartu yang cocok untuk menguji memorimu. Selesaikan secepat mungkin!
+            </p>
+            <button id="start-game-btn" class="w-full bg-yellow-500 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-yellow-600 transition">
+                Mulai Bermain
+            </button>
+        </div>
+    </div>
+
+    <div id="game-wrapper" class="w-full max-w-lg mx-auto hidden">
+        <header class="text-center mb-6">
+            <h1 class="text-4xl md:text-5xl font-black text-gray-800 tracking-wide">Tangkap Gambar</h1>
+        </header>
+
+        <div class="flex justify-around mb-6 p-4 info-card">
+            <div class="text-center">
+                <span class="text-sm font-bold text-gray-500">LANGKAH</span>
+                <p id="moves-counter" class="text-2xl font-bold text-gray-700">0</p>
+            </div>
+            <div class="text-center">
+                <span class="text-sm font-bold text-gray-500">WAKTU</span>
+                <p id="timer" class="text-2xl font-bold text-gray-700">0s</p>
+            </div>
+        </div>
+
+        <main id="game-board" class="game-board">
+            </main>
+
+        
+    </div>
+
+    <div id="win-modal" class="fixed inset-0 modal-bg flex items-center justify-center p-4 hidden z-20">
+        <div class="modal-card w-full max-w-sm p-8 text-center transform transition-all scale-95 opacity-0">
+            <div class="text-6xl mb-4">🎉</div>
+            <h2 class="text-3xl font-black text-gray-800">Anda Menang!</h2>
+            <p class="text-lg text-gray-600 mt-2 mb-6">Memori Anda luar biasa!</p>
+            <div class="bg-blue-100 p-4 rounded-lg text-xl font-bold text-blue-800 mb-6">
+                <p>Langkah: <span id="final-moves">0</span></p>
+                <p>Waktu: <span id="final-time">0</span>s</p>
+            </div>
+            <button id="play-again-btn" class="w-full bg-green-500 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-green-600 transition">
+                Main Lagi
+            </button>
+            <button id="back-to-menu-btn" class="w-full mt-2 bg-blue-500 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-blue-600 transition">
+                Kembali ke Menu
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const gameBoard = document.getElementById('game-board');
+            const movesCounterEl = document.getElementById('moves-counter');
+            const timerEl = document.getElementById('timer');
+            const winModal = document.getElementById('win-modal');
+            const playAgainBtn = document.getElementById('play-again-btn');
+            const finalMovesEl = document.getElementById('final-moves');
+            const finalTimeEl = document.getElementById('final-time');
+            
+            // Elemen baru untuk petunjuk dan tombol menu
+            const instructionModal = document.getElementById('instruction-modal');
+            const startGameBtn = document.getElementById('start-game-btn');
+            const gameWrapper = document.getElementById('game-wrapper');
+            const backToMenuBtn = document.getElementById('back-to-menu-btn'); // 1. Variabel untuk tombol baru
+
+            // Daftar ikon untuk kartu. Setiap ikon muncul dua kali.
+            const cardIcons = ['🤖', '🚀', '💻', '💡', '⚙️', '🌐', '🤖', '🚀', '💻', '💡', '⚙️', '🌐'];
+
+            let hasFlippedCard = false;
+            let lockBoard = false;
+            let firstCard, secondCard;
+            let moves = 0;
+            let timerValue = 0;
+            let timerInterval;
+            let matchedPairs = 0;
+
+            // Fungsi untuk mengacak array (Algoritma Fisher-Yates)
+            function shuffle(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+            }
+
+            // Fungsi untuk membuat papan permainan
+            function createBoard() {
+                shuffle(cardIcons);
+                gameBoard.innerHTML = ''; // Kosongkan papan sebelum membuat kartu baru
+                cardIcons.forEach(icon => {
+                    const cardElement = document.createElement('div');
+                    cardElement.classList.add('memory-card');
+                    cardElement.dataset.icon = icon;
+
+                    cardElement.innerHTML = `
+                        <div class="front-face">${icon}</div>
+                        <div class="back-face">🧠</div>
+                    `;
+                    gameBoard.appendChild(cardElement);
+                    cardElement.addEventListener('click', flipCard);
+                });
+            }
+
+            // Fungsi utama saat kartu diklik
+            function flipCard() {
+                if (lockBoard) return;
+                if (this === firstCard) return; // Mencegah klik ganda pada kartu yang sama
+
+                this.classList.add('flip');
+
+                if (!hasFlippedCard) {
+                    // Klik pertama
+                    hasFlippedCard = true;
+                    firstCard = this;
+                } else {
+                    // Klik kedua
+                    hasFlippedCard = false;
+                    secondCard = this;
+                    incrementMoves();
+                    checkForMatch();
+                }
+            }
+
+            // Memeriksa apakah kedua kartu yang dibalik cocok
+            function checkForMatch() {
+                const isMatch = firstCard.dataset.icon === secondCard.dataset.icon;
+                isMatch ? disableCards() : unflipCards();
+            }
+
+            // Jika kartu cocok, nonaktifkan agar tidak bisa diklik lagi
+            function disableCards() {
+                firstCard.removeEventListener('click', flipCard);
+                secondCard.removeEventListener('click', flipCard);
+                
+                matchedPairs++;
+                if (matchedPairs === cardIcons.length / 2) {
+                    endGame();
+                }
+
+                resetBoard();
+            }
+
+            // Jika kartu tidak cocok, balikkan kembali
+            function unflipCards() {
+                lockBoard = true; // Kunci papan agar tidak ada kartu lain yang bisa dibuka
+                setTimeout(() => {
+                    firstCard.classList.remove('flip');
+                    secondCard.classList.remove('flip');
+                    resetBoard();
+                }, 1200); // Waktu tunggu sebelum kartu dibalik kembali
+            }
+            
+            // Mengatur ulang variabel papan untuk giliran berikutnya
+            function resetBoard() {
+                [hasFlippedCard, lockBoard] = [false, false];
+                [firstCard, secondCard] = [null, null];
+            }
+
+            // Menambah jumlah langkah
+            function incrementMoves() {
+                moves++;
+                movesCounterEl.textContent = moves;
+            }
+
+            // Memulai atau mengatur ulang timer
+            function startTimer() {
+                clearInterval(timerInterval); // Hentikan timer yang ada
+                timerValue = 0;
+                timerEl.textContent = `${timerValue}s`;
+                timerInterval = setInterval(() => {
+                    timerValue++;
+                    timerEl.textContent = `${timerValue}s`;
+                }, 1000);
+            }
+
+            // Fungsi untuk memulai ulang permainan
+            function restartGame() {
+                // Sembunyikan modal jika terbuka
+                winModal.classList.add('hidden');
+                winModal.querySelector('.modal-card').classList.add('scale-95', 'opacity-0');
+
+                // Atur ulang state permainan
+                moves = 0;
+                matchedPairs = 0;
+                movesCounterEl.textContent = moves;
+                lockBoard = false;
+                resetBoard();
+                
+                // Buat papan baru dan mulai timer
+                createBoard();
+                startTimer();
+            }
+
+            // Fungsi saat permainan berakhir
+            function endGame() {
+                clearInterval(timerInterval);
+                finalMovesEl.textContent = moves;
+                finalTimeEl.textContent = timerValue;
+                
+                // Tampilkan modal kemenangan
+                winModal.classList.remove('hidden');
+                setTimeout(() => {
+                     winModal.querySelector('.modal-card').classList.remove('scale-95', 'opacity-0');
+                }, 10);
+            }
+
+            // Fungsi untuk memulai game dari modal petunjuk
+            function initGame() {
+                instructionModal.classList.add('hidden');
+                gameWrapper.classList.remove('hidden');
+                restartGame();
+            }
+
+            // 2. Fungsi baru untuk kembali ke menu utama
+            function showMenu() {
+                // Sembunyikan modal kemenangan
+                winModal.classList.add('hidden');
+                winModal.querySelector('.modal-card').classList.add('scale-95', 'opacity-0');
+                
+                // Sembunyikan papan permainan
+                gameWrapper.classList.add('hidden');
+
+                // Tampilkan modal petunjuk awal
+                instructionModal.classList.remove('hidden');
+                setTimeout(() => {
+                     instructionModal.querySelector('.modal-card').classList.remove('scale-95', 'opacity-0');
+                }, 100);
+            }
+
+            // Tampilkan modal petunjuk saat halaman dimuat
+            setTimeout(() => {
+                instructionModal.querySelector('.modal-card').classList.remove('scale-95', 'opacity-0');
+            }, 100);
+
+            // Event listener untuk tombol
+            startGameBtn.addEventListener('click', initGame);
+            playAgainBtn.addEventListener('click', restartGame);
+            backToMenuBtn.addEventListener('click', showMenu); // 3. Event listener untuk tombol baru
+        });
+    </script>
+</body>
+</html>

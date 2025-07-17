@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kode Rahasia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(270deg, #d4af37, #f7d76a, #e6c556, #b8860b);
+            background-size: 400% 400%;
+            animation: goldShimmer 15s ease infinite;
+        }
+
+        @keyframes goldShimmer {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .answer-btn {
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            border: 4px solid transparent;
+            background-color: white;
+            padding: 1rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-size: 3rem;
+        }
+        .answer-btn:hover {
+            transform: scale(1.1);
+            border-color: #fbbf24; /* amber-400 */
+        }
+        .modal-bg {
+            background-color: rgba(0, 0, 0, 0.5);
+            transition: opacity 0.3s ease;
+        }
+        .scale-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div id="instruction-modal" class="fixed inset-0 modal-bg flex items-center justify-center p-4 z-20">
+        <div class="card w-full max-w-md p-8 text-center transform transition-all scale-95 opacity-0">
+            <div class="flex justify-center mb-4">
+                 <svg class="w-24 h-24 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 1 1 9 0v3.75M3.75 21.75h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H3.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                 </svg>
+            </div>
+            <h2 class="text-3xl font-black text-gray-800">Kode Rahasia</h2>
+            <p class="text-lg text-gray-700 mt-4 mb-6">
+                Perhatikan dengan baik <strong>GAMBAR TIMBANGAN</strong> untuk mengetahui benda mana yang lebih berat. Lalu, baca dan jawablah pertanyaan dengan memilih benda yang benar. Kamu punya waktu <strong>150 detik</strong>.
+            </p>
+            <button id="start-game-btn" class="w-full bg-green-500 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-green-600 transition">
+                Mulai Permainan
+            </button>
+        </div>
+    </div>
+
+    <div id="game-container" class="card w-full max-w-3xl p-6 md:p-8 text-center hidden">
+        <header class="mb-6">
+            <h1 class="text-3xl md:text-4xl font-black text-gray-800">Kode Rahasia</h1>
+            <div class="flex justify-between items-center mt-4 text-2xl">
+                <p class="font-bold text-gray-600">Soal: <span id="question-number">1</span></p>
+                <p class="font-bold text-red-500">Waktu: <span id="timer">150</span> detik</p>
+            </div>
+        </header>
+
+        <main>
+            <div id="scales-display" class="scale-container bg-gray-100 p-4 rounded-xl mb-6 min-h-[120px]">
+            </div>
+            <p id="question-text" class="text-xl md:text-2xl font-bold text-gray-700 mb-4">Manakah yang paling berat?</p>
+
+            <div id="answer-buttons" class="flex justify-center items-center gap-4">
+            </div>
+        </main>
+    </div>
+
+    <div id="result-modal" class="fixed inset-0 modal-bg flex items-center justify-center p-4 hidden z-20">
+        <div class="card w-full max-w-md p-8 text-center transform transition-all scale-95 opacity-0">
+            <div id="result-icon" class="text-8xl mb-4"></div>
+            <h2 id="result-title" class="text-4xl font-black"></h2>
+            <p id="result-subtitle" class="text-lg text-gray-700 mt-2 mb-4"></p>
+            
+            <div class="bg-blue-100 p-4 rounded-lg text-2xl font-bold text-blue-800 mb-6">
+                Skor Akhir: <span id="final-score">0</span>
+            </div>
+            <button id="play-again-btn" class="w-full bg-green-500 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-green-600 transition mb-4">
+                Main Lagi
+            </button>
+            <button onclick="window.location.href='index.html'" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-blue-700 transition">
+                Kembali ke Menu
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- Helper untuk membuat SVG Timbangan ---
+        const createScaleSVG = (leftItem, rightItem, outcome) => {
+            let leftY = 45, rightY = 45;
+            if (outcome === 'left') { leftY = 55; rightY = 35; } 
+            else if (outcome === 'right') { leftY = 35; rightY = 55; }
+            return `
+                <svg width="150" height="100" viewBox="-5 -10 160 120">
+                    <line x1="75" y1="45" x2="75" y2="85" stroke="#6b7280" stroke-width="4" />
+                    <polygon points="65,85 85,85 75,95" fill="#6b7280" />
+                    <line x1="10" y1="${leftY}" x2="140" y2="${rightY}" stroke="#6b7280" stroke-width="4" />
+                    <text x="10" y="${leftY - 15}" font-size="24" text-anchor="middle" dominant-baseline="central">${leftItem}</text>
+                    <text x="140" y="${rightY - 15}" font-size="24" text-anchor="middle" dominant-baseline="central">${rightItem}</text>
+                </svg>`;
+        };
+
+        // --- Data Soal ---
+        const questions = [
+            { scales: [{ l: '🍎', r: '🍌', o: 'left' }, { l: '🍌', r: '🍇', o: 'left' }], q: "Manakah yang paling berat?", opts: ['🍎', '🍌', '🍇'], ans: '🍎' },
+            { scales: [{ l: '🐶', r: '🐱', o: 'right' }, { l: '🦊', r: '🐶', o: 'right' }], q: "Manakah yang paling ringan?", opts: ['🐶', '🐱', '🦊'], ans: '🦊' },
+            { scales: [{ l: '🚗', r: '🚲', o: 'left' }, { l: '🚲', r: '🛵', o: 'right' }], q: "Manakah yang paling berat?", opts: ['🚗', '🚲', '🛵'], ans: '🚗' },
+            { scales: [{ l: '⭐', r: '❤️', o: 'equal' }, { l: '❤️', r: '⚡', o: 'right' }], q: "Manakah yang paling berat?", opts: ['⭐', '❤️', '⚡'], ans: '⚡' },
+            { scales: [{ l: 'A', r: 'B', o: 'left' }, { l: 'C', r: 'A', o: 'left' }], q: "Manakah yang paling ringan?", opts: ['A', 'B', 'C'], ans: 'B' },
+            { scales: [{ l: '⚽', r: '🏀', o: 'right' }, { l: '🏀', r: '🏐', o: 'left' }], q: "Manakah yang paling ringan?", opts: ['⚽', '🏀', '🏐'], ans: '🏐' },
+            { scales: [{ l: 'X', r: 'Y', o: 'left' }, { l: 'Y', r: 'Z', o: 'equal' }], q: "Manakah yang paling berat?", opts: ['X', 'Y', 'Z'], ans: 'X' },
+            { scales: [{ l: '🟥', r: '🟩', o: 'right' }, { l: '🟦', r: '🟩', o: 'left' }], q: "Manakah yang paling ringan?", opts: ['🟥', '🟩', '🟦'], ans: '🟥' },
+            { scales: [{ l: '🦁', r: '🐯', o: 'left' }, { l: '🐘', r: '🦁', o: 'left' }], q: "Manakah yang paling berat?", opts: ['🦁', '🐯', '🐘'], ans: '🐘' },
+            { scales: [{ l: '1', r: '2', o: 'right' }, { l: '3', r: '2', o: 'left' }], q: "Manakah yang paling ringan?", opts: ['1', '2', '3'], ans: '1' }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timeLeft = 150;
+        let timerInterval;
+
+        const instructionModalEl = document.getElementById('instruction-modal');
+        const gameContainerEl = document.getElementById('game-container');
+        const resultModalEl = document.getElementById('result-modal');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const playAgainBtn = document.getElementById('play-again-btn');
+        const questionNumberEl = document.getElementById('question-number');
+        const timerEl = document.getElementById('timer');
+        const scalesDisplayEl = document.getElementById('scales-display');
+        const questionTextEl = document.getElementById('question-text');
+        const answerButtonsEl = document.getElementById('answer-buttons');
+        const finalScoreEl = document.getElementById('final-score');
+        
+        const resultIconEl = document.getElementById('result-icon');
+        const resultTitleEl = document.getElementById('result-title');
+        const resultSubtitleEl = document.getElementById('result-subtitle');
+
+        function startGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            timeLeft = 150;
+            timerEl.textContent = timeLeft;
+            clearInterval(timerInterval);
+            showQuestion();
+            startTimer();
+        }
+
+        function showQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                endGame();
+                return;
+            }
+
+            let currentQuestion = questions[currentQuestionIndex];
+            questionNumberEl.textContent = `${currentQuestionIndex + 1}/${questions.length}`;
+            questionTextEl.textContent = currentQuestion.q;
+
+            scalesDisplayEl.innerHTML = '';
+            currentQuestion.scales.forEach(scale => {
+                scalesDisplayEl.innerHTML += createScaleSVG(scale.l, scale.r, scale.o);
+            });
+
+            answerButtonsEl.innerHTML = '';
+            currentQuestion.opts.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'answer-btn';
+                button.textContent = option;
+                button.onclick = () => selectAnswer(option);
+                answerButtonsEl.appendChild(button);
+            });
+        }
+
+        function selectAnswer(selectedOption) {
+            if (selectedOption === questions[currentQuestionIndex].ans) {
+                score++;
+            }
+            currentQuestionIndex++;
+            showQuestion();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerEl.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            gameContainerEl.classList.add('hidden');
+            finalScoreEl.textContent = `${score} / ${questions.length}`;
+
+            let icon, title, subtitle, titleColorClass;
+
+            if (score <= 2) { // Level 0-2
+                icon = '🤔';
+                title = 'Pemula Logis';
+                subtitle = 'Jangan menyerah, latihan membuat sempurna.';
+                titleColorClass = 'text-gray-700';
+            } else if (score <= 5) { // Level 3-5
+                icon = '👍';
+                title = 'Penalar Andal';
+                subtitle = 'Kerja bagus, terus asah logikamu.';
+                titleColorClass = 'text-blue-600';
+            } else if (score <= 8) { // Level 6-8
+                icon = '🎉';
+                title = 'Pemikir Tajam';
+                subtitle = 'Kamu punya penalaran yang hebat!';
+                titleColorClass = 'text-green-500';
+            } else { // Level 9-10
+                icon = '🏆';
+                title = 'Master Kode';
+                subtitle = 'Logikamu setajam silet! Luar biasa!';
+                titleColorClass = 'text-yellow-500';
+            }
+
+            resultIconEl.textContent = icon;
+            resultTitleEl.textContent = title;
+            resultSubtitleEl.textContent = subtitle;
+            resultTitleEl.className = `text-4xl font-black ${titleColorClass}`;
+
+            resultModalEl.classList.remove('hidden');
+            setTimeout(() => {
+                const modalContent = resultModalEl.querySelector('.card');
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+        
+        function playAgain() {
+            resultModalEl.classList.add('hidden');
+            const modalContent = resultModalEl.querySelector('.card');
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+
+            gameContainerEl.classList.remove('hidden');
+            startGame();
+        }
+
+        function initializePage() {
+            const modalContent = instructionModalEl.querySelector('.card');
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+
+            startGameBtn.addEventListener('click', () => {
+                instructionModalEl.classList.add('hidden');
+                gameContainerEl.classList.remove('hidden');
+                startGame();
+            });
+
+            playAgainBtn.addEventListener('click', playAgain);
+        }
+
+        document.addEventListener('DOMContentLoaded', initializePage);
+    </script>
+</body>
+</html>

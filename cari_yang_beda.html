@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cari Yang Beda?</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Keyframes untuk animasi gradasi */
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            /* Definisikan gradasi dengan beberapa warna tosca/hijau/biru */
+            background: linear-gradient(135deg, #43e97b, #38f9d7, #209cff);
+            /* Buat ukuran background jauh lebih besar dari layar */
+            background-size: 400% 400%;
+            /* Terapkan animasi */
+            animation: gradientAnimation 20s ease-in-out infinite;
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .answer-btn {
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            font-size: 5rem; /* Ukuran emoji gambar lebih besar */
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 4px solid transparent;
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            aspect-ratio: 1 / 1;
+        }
+        .answer-btn:hover {
+            transform: scale(1.1);
+            border-color: #fbbf24;
+        }
+        .modal-bg {
+            background-color: rgba(0, 0, 0, 0.5);
+            transition: opacity 0.3s ease;
+        }
+
+        /* Styling untuk teks "Soal" dan "Waktu" */
+        .header-info-text {
+            font-weight: 900; /* Extra bold */
+            font-size: 1.75rem; /* Ukuran yang lebih besar, setara dengan text-3xl Tailwind */
+            line-height: 2.25rem;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div id="instruction-modal" class="fixed inset-0 modal-bg flex items-center justify-center p-4 z-20">
+        <div class="card w-full max-w-md p-8 text-center transform transition-all scale-95 opacity-0">
+            <span class="text-7xl mb-4 inline-block">🔍</span>
+            <h2 class="text-3xl font-black text-gray-800">Cari Yang Beda</h2>
+            <p class="text-lg text-gray-700 mt-4 mb-6">
+                Pikirkan baik-baik! Dari empat gambar yang ada, pilih satu yang karakternya paling berbeda atau yang tidak termasuk dalam kelompok yang sama! Kamu memiliki waktu <strong>120 detik</strong>. <strong>Siap bermain???</strong>.
+            </p>
+            <button id="start-game-btn" class="w-full bg-green-500 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-green-600 transition">
+                Ayo Mulai Permainan!
+            </button>
+        </div>
+    </div>
+
+    <div id="game-container" class="card w-full max-w-3xl p-6 md:p-8 text-center hidden">
+        <header class="mb-6">
+            <h1 class="text-3xl md:text-4xl font-black text-gray-800">Mana yang paling beda?</h1>
+            <div class="flex justify-between items-center mt-4">
+                <p class="text-gray-600 header-info-text">Soal: <span id="question-number">1</span>/10</p>
+                <p class="text-red-500 header-info-text">Waktu: <span id="timer">120</span> detik</p>
+            </div>
+        </header>
+
+        <main>
+            <p id="question-prompt" class="text-xl md:text-2xl font-bold text-gray-700 mb-6">Manakah yang tidak termasuk dalam kelompok?</p>
+            
+            <div id="answer-buttons" class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                </div>
+        </main>
+    </div>
+
+    <div id="result-modal" class="fixed inset-0 modal-bg flex items-center justify-center p-4 hidden z-20">
+        <div class="card w-full max-w-md p-8 text-center transform transition-all scale-95 opacity-0">
+            <span class="text-7xl mb-4 inline-block">🏆</span>
+            <h2 class="text-4xl font-black text-yellow-500">Analisis Hebat!</h2>
+            <p class="text-lg text-gray-700 mt-2 mb-4">Kamu pandai mengelompokkan benda!</p>
+            <div class="bg-blue-100 p-4 rounded-lg text-2xl font-bold text-blue-800 mb-6">
+                Skor Akhir: <span id="final-score">0</span>
+            </div>
+            <button id="play-again-btn" class="w-full bg-purple-600 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-purple-700 transition mb-4">
+                Main Lagi
+            </button>
+            <button onclick="window.location.href='index.html'" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-blue-700 transition">
+                Kembali ke Menu
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            // Konsep: Bentuk (garis lurus vs lengkung)
+            { options: ['▲', '■', '◆', '●'], answer: '●' },
+            // Konsep: Kategori (buah vs sayur)
+            { options: ['🍓', '🥦', '🍌', '🍇'], answer: '🥦' },
+            // Konsep: Habitat (darat vs air)
+            { options: ['🐘', '🐅', '🦓', '🐠'], answer: '🐠' },
+            // Konsep: Fungsi (alat musik vs alat olahraga)
+            { options: ['🎸', '🎹', '⚽', '🎺'], answer: '⚽' },
+            // Konsep: Ramah lingkungan vs tidak
+            { options: ['🚲', '🛴', '🚌', '🛹'], answer: '🚌' },
+            // Konsep: Warna (warna primer vs sekunder)
+            { options: ['🟥', '🟦', '🟨', '🟩'], answer: '🟩' },
+            // Konsep: Jenis (hewan vs tumbuhan) - Kucing diganti Kelinci
+            { options: ['🐶', '🐰', '🌳', '🐭'], answer: '🌳' },
+            // Konsep: Fungsi (alat makan vs alat tulis)
+            { options: ['🍴', '🥄', '✏️', '🔪'], answer: '✏️' },
+            // Konsep: Bagian tubuh (kaki vs tangan)
+            { options: ['🦶', '🦵', '👟', '🖐️'], answer: '🖐️' },
+            // Konsep: Benda langit (memancarkan cahaya vs memantulkan)
+            { options: ['☀️', '🌙', '⭐', '🪐'], answer: '☀️' }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timeLeft = 120;
+        let timerInterval;
+
+        const instructionModalEl = document.getElementById('instruction-modal');
+        const gameContainerEl = document.getElementById('game-container');
+        const resultModalEl = document.getElementById('result-modal');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const questionNumberEl = document.getElementById('question-number');
+        const timerEl = document.getElementById('timer');
+        const answerButtonsEl = document.getElementById('answer-buttons');
+        const finalScoreEl = document.getElementById('final-score');
+        const playAgainBtn = document.getElementById('play-again-btn'); // Dapatkan elemen tombol "Main Lagi"
+
+        function startGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            timeLeft = 120;
+            showQuestion();
+            startTimer();
+        }
+
+        function showQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                endGame();
+                return;
+            }
+
+            let currentQuestion = questions[currentQuestionIndex];
+            questionNumberEl.textContent = currentQuestionIndex + 1;
+            
+            answerButtonsEl.innerHTML = '';
+            // Acak urutan pilihan jawaban
+            const shuffledOptions = [...currentQuestion.options].sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'answer-btn';
+                button.textContent = option;
+                button.onclick = () => selectAnswer(option, currentQuestion.answer);
+                answerButtonsEl.appendChild(button);
+            });
+        }
+
+        function selectAnswer(selectedOption, correctAnswer) {
+            if (selectedOption === correctAnswer) {
+                score++;
+            }
+            currentQuestionIndex++;
+            showQuestion();
+        }
+
+        function startTimer() {
+            timerEl.textContent = timeLeft;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerEl.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            gameContainerEl.classList.add('hidden');
+            finalScoreEl.textContent = `${score} / ${questions.length}`;
+            resultModalEl.classList.remove('hidden');
+            setTimeout(() => {
+                const modalContent = resultModalEl.querySelector('.card');
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function initializePage() {
+            const modalContent = instructionModalEl.querySelector('.card');
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+
+            startGameBtn.addEventListener('click', () => {
+                instructionModalEl.classList.add('hidden');
+                gameContainerEl.classList.remove('hidden');
+                startGame();
+            });
+
+            // Event listener untuk tombol "Main Lagi"
+            playAgainBtn.addEventListener('click', () => {
+                resultModalEl.classList.add('hidden'); // Sembunyikan modal hasil
+                gameContainerEl.classList.remove('hidden'); // Tampilkan kontainer game
+                startGame(); // Mulai permainan lagi
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initializePage);
+    </script>
+</body>
+</html>

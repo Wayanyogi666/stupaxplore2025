@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hubungan Konsep</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <style>
+        /* Animasi untuk latar belakang */
+        @keyframes skyAnimation {
+            0%   { background-color: #87CEEB; } /* Sky Blue */
+            50%  { background-color: #B0E0E6; } /* Powder Blue */
+            100% { background-color: #87CEEB; } /* Sky Blue */
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            color: #1f2937;
+            animation: skyAnimation 20s ease infinite;
+            background-color: #87CEEB; /* Warna awal */
+        }
+        .card {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 3px solid #fff;
+        }
+        .modal-bg {
+            background-color: rgba(0, 0, 0, 0.6);
+            transition: opacity 0.3s ease;
+        }
+        .analogy-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4b5563;
+        }
+        .analogy-item {
+            font-size: 3.5rem;
+            background-color: #e5e7eb;
+            padding: 1rem;
+            border-radius: 1rem;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            line-height: 1;
+        }
+        .answer-btn {
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            font-size: 3.5rem;
+            border: 4px solid transparent;
+            background-color: white;
+            padding: 1rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            aspect-ratio: 1 / 1;
+        }
+        .answer-btn:hover {
+            transform: scale(1.1);
+            border-color: #34d399;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div id="instruction-modal" class="fixed inset-0 modal-bg flex items-center justify-center p-4 z-20">
+        <div class="card w-full max-w-md p-8 text-center transform transition-all scale-95 opacity-0">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-24 h-24 mx-auto mb-4 text-blue-500">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3.75H19.5M8.25 6.75H19.5M8.25 9.75H19.5M8.25 12.75H19.5M8.25 15.75H19.5M8.25 18.75H19.5M3.375 3.75h.008v.008h-.008V3.75zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008V9.75zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008V18.75z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 21V3M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-10.5a2.25 2.25 0 01-2.25-2.25V6.75m15 0V3.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 3.75v3" />
+            </svg>
+
+            <h2 class="text-3xl font-black text-gray-800">Hubungan Konsep</h2>
+            <p class="text-lg text-gray-700 mt-4 mb-6 text-left">
+                Perhatikan hubungan antara dua gambar pertama. Kemudian, temukan gambar yang memiliki hubungan yang sama dengan gambar ketiga. Kamu punya waktu <strong>180 detik</strong>. Siap untuk bermain?
+            </p>
+            <button id="start-game-btn" class="w-full bg-green-500 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-green-600 transition">
+                Mulai Bermain
+            </button>
+        </div>
+    </div>
+
+    <div id="game-container" class="card w-full max-w-2xl p-6 md:p-8 hidden">
+        <header class="mb-6 text-center">
+            <h1 class="text-3xl md:text-4xl font-black text-gray-800">Hubungan Konsep</h1>
+            <div class="flex justify-between items-center mt-2 text-lg">
+                <p class="font-bold text-gray-600">Soal: <span id="question-number">1</span></p>
+                <p class="font-bold text-red-500">Waktu: <span id="timer">180</span> detik</p>
+            </div>
+        </header>
+
+        <main>
+            <div id="analogy-display" class="analogy-box bg-gray-100 p-4 rounded-xl mb-6">
+                <div id="itemA" class="analogy-item"></div>
+                <span>:</span>
+                <div id="itemB" class="analogy-item"></div>
+                <span class="text-4xl">::</span>
+                <div id="itemC" class="analogy-item"></div>
+                <span>:</span>
+                <div class="analogy-item bg-gray-300 text-gray-500">?</div>
+            </div>
+            <p class="text-lg font-bold text-center mb-4 text-gray-800">Manakah gambar yang tepat untuk mengisi tanda tanya?</p>
+            <div id="answer-buttons" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                </div>
+        </main>
+    </div>
+
+    <div id="result-modal" class="fixed inset-0 modal-bg flex items-center justify-center p-4 hidden z-20">
+        <div class="card w-full max-w-md p-8 text-center transform transition-all scale-95 opacity-0">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-24 h-24 mx-auto mb-4 text-blue-500">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3.75H19.5M8.25 6.75H19.5M8.25 9.75H19.5M8.25 12.75H19.5M8.25 15.75H19.5M8.25 18.75H19.5M3.375 3.75h.008v.008h-.008V3.75zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008V9.75zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008V18.75z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 21V3M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-10.5a2.25 2.25 0 01-2.25-2.25V6.75m15 0V3.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 3.75v3" />
+            </svg>
+
+            <h2 class="text-4xl font-black text-yellow-500">Pemikir Hebat!</h2>
+            <p class="text-lg text-gray-700 mt-2 mb-4">Kamu sangat pandai menghubungkan ide!</p>
+            <div class="bg-blue-100 p-4 rounded-lg text-2xl font-bold text-blue-800 mb-6">
+                Skor Akhir: <span id="final-score">0</span>
+            </div>
+            
+            <button id="play-again-btn" class="w-full bg-green-500 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-green-600 transition mb-4">
+                Main Lagi
+            </button>
+            <button onclick="window.location.href='index.html'" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg text-lg hover:bg-blue-700 transition">
+                Kembali ke Menu
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            { a: '🧤', b: '🖐️', c: '👟', options: ['👂', '👃', '🦶', '👀'], answer: '🦶' },
+            { a: '🐄', b: '🥛', c: '🐝', options: ['🌸', '🍯', '💧', '🌳'], answer: '🍯' },
+            { a: '☀️', b: '😎', c: '🌧️', options: ['🧥', '🧢', '☂️', '🧣'], answer: '☂️' },
+            { a: '✏️', b: '📓', c: '🖌️', options: ['🖼️', '🎨', '🖍️', '📜'], answer: '🎨' },
+            { a: 'Ulat', b: '🐛', c: 'Kupu-kupu', options: ['🦋', '🐞', '🐜', '🐌'], answer: '🦋' },
+            { a: '🚗', b: '🛣️', c: '🚂', options: ['🛤️', '🌊', '☁️', '🏠'], answer: '🛤️' },
+            { a: '👨‍🍳', b: '🍳', c: '👨‍⚕️', options: ['💉', '💊', '🚑', '🏥'], answer: '💉' },
+            { a: '🍞', b: '🔪', c: '🌳', options: ['✂️', '🔨', '🪓', '🔧'], answer: '🪓' },
+            { a: '🥶', b: '🔥', c: '🥵', options: ['💧', '🧊', '❄️', '💨'], answer: '🧊' },
+            { a: '✉️', b: '📮', c: '🗑️', options: ['♻️', '🚮', '📦', '🧺'], answer: '🚮' }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timeLeft = 180;
+        let timerInterval;
+
+        const instructionModalEl = document.getElementById('instruction-modal');
+        const gameContainerEl = document.getElementById('game-container');
+        const resultModalEl = document.getElementById('result-modal');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const playAgainBtn = document.getElementById('play-again-btn');
+        const questionNumberEl = document.getElementById('question-number');
+        const timerEl = document.getElementById('timer');
+        const itemAEl = document.getElementById('itemA');
+        const itemBEl = document.getElementById('itemB');
+        const itemCEl = document.getElementById('itemC');
+        const answerButtonsEl = document.getElementById('answer-buttons');
+        const finalScoreEl = document.getElementById('final-score');
+
+        const correctSound = new Tone.PluckSynth({ volume: -5 }).toDestination();
+        const wrongSound = new Tone.MembraneSynth().toDestination();
+
+        function setupLevel(levelIndex) {
+            const currentQuestion = questions[levelIndex];
+            questionNumberEl.textContent = `${levelIndex + 1}/10`;
+            
+            const setItemContent = (element, text) => {
+                element.textContent = text;
+                if (text === 'Ulat' || text === 'Kupu-kupu') {
+                    element.style.fontSize = '1.5rem';
+                } else {
+                    element.style.fontSize = '3.5rem';
+                }
+            };
+
+            setItemContent(itemAEl, currentQuestion.a);
+            setItemContent(itemBEl, currentQuestion.b);
+            setItemContent(itemCEl, currentQuestion.c);
+
+            answerButtonsEl.innerHTML = '';
+            const shuffledOptions = [...currentQuestion.options].sort(() => Math.random() - 0.5);
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.className = 'answer-btn';
+                button.textContent = option;
+                button.onclick = () => selectAnswer(option, currentQuestion.answer);
+                answerButtonsEl.appendChild(button);
+            });
+        }
+
+        function selectAnswer(selectedOption, correctAnswer) {
+            if (selectedOption === correctAnswer) {
+                score++;
+                correctSound.triggerAttackRelease("C5", "8n", Tone.now());
+            } else {
+                wrongSound.triggerAttackRelease("C2", "8n", Tone.now());
+            }
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= 10) {
+                endGame();
+            } else {
+                setupLevel(currentQuestionIndex);
+            }
+        }
+
+        function startTimer() {
+            timeLeft = 180;
+            timerEl.textContent = timeLeft;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerEl.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            finalScoreEl.textContent = `${score} / 10`;
+            resultModalEl.classList.remove('hidden');
+            setTimeout(() => {
+                resultModalEl.querySelector('.card').classList.remove('scale-95', 'opacity-0');
+            }, 10);
+        }
+        
+        function resetAndStartGame() {
+            gameContainerEl.classList.remove('hidden');
+            currentQuestionIndex = 0;
+            score = 0;
+            clearInterval(timerInterval);
+            setupLevel(currentQuestionIndex);
+            startTimer();
+        }
+
+        function initializePage() {
+            const modalContent = instructionModalEl.querySelector('.card');
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+
+            startGameBtn.addEventListener('click', () => {
+                if (Tone.context.state !== 'running') {
+                    Tone.start();
+                }
+                instructionModalEl.classList.add('hidden');
+                resetAndStartGame();
+            });
+
+            playAgainBtn.addEventListener('click', () => {
+                resultModalEl.classList.add('hidden');
+                resultModalEl.querySelector('.card').classList.add('scale-95', 'opacity-0');
+                resetAndStartGame();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initializePage);
+    </script>
+</body>
+</html>
