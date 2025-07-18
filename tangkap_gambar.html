@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tangkap Gambar: Game Mengasah Ingatan</title>
+    <link rel="icon" type="image/x-icon" href="https://lh3.googleusercontent.com/d/1UYO2kNSVaxOtOIMGo0eKrKdXH7o4NgMi">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -116,9 +117,7 @@
         </div>
 
         <main id="game-board" class="game-board">
-            </main>
-
-        
+        </main>
     </div>
 
     <div id="win-modal" class="fixed inset-0 modal-bg flex items-center justify-center p-4 hidden z-20">
@@ -291,7 +290,7 @@
                 // Tampilkan modal kemenangan
                 winModal.classList.remove('hidden');
                 setTimeout(() => {
-                     winModal.querySelector('.modal-card').classList.remove('scale-95', 'opacity-0');
+                    winModal.querySelector('.modal-card').classList.remove('scale-95', 'opacity-0');
                 }, 10);
             }
 
@@ -302,20 +301,11 @@
                 restartGame();
             }
 
+            // **BAGIAN YANG DIUBAH:**
             // 2. Fungsi baru untuk kembali ke menu utama
             function showMenu() {
-                // Sembunyikan modal kemenangan
-                winModal.classList.add('hidden');
-                winModal.querySelector('.modal-card').classList.add('scale-95', 'opacity-0');
-                
-                // Sembunyikan papan permainan
-                gameWrapper.classList.add('hidden');
-
-                // Tampilkan modal petunjuk awal
-                instructionModal.classList.remove('hidden');
-                setTimeout(() => {
-                     instructionModal.querySelector('.modal-card').classList.remove('scale-95', 'opacity-0');
-                }, 100);
+                // Mengarahkan ke halaman home/daftar permainan
+                window.location.href = 'home.html'; // Ganti 'index.html' dengan path ke halaman home/daftar permainan Anda
             }
 
             // Tampilkan modal petunjuk saat halaman dimuat
